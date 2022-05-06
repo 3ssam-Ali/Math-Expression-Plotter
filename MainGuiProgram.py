@@ -36,6 +36,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.MulButton.clicked.connect(lambda: self.addText('*'))
         self.DivButton.clicked.connect(lambda: self.addText('/'))
         self.PowButton.clicked.connect(lambda: self.addText('^'))
+        self.XButton.clicked.connect(lambda: self.addText('x'))
         self.PlotButton.clicked.connect(self.plot)
         # drawing en example graph at start
         self.graphWidget.plot(
