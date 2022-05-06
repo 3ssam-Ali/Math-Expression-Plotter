@@ -35,8 +35,11 @@ class Expression:
     }
 
     def __init__(self, expr: str):
-        if not self.checkValid(expr):
+        valid=self.checkValid(expr)
+        if valid == -1:
             raise ValueError(f"Not a valid algebraic expression: {expr}.")
+        elif valid == -2: 
+            raise SyntaxError('There are a bracket or X without and operator before it')
         else:
             try:
                 self.astCode = ast.parse(expr, mode='eval')
@@ -51,13 +54,16 @@ class Expression:
             expr (str): A string mathimatical expression
 
         Returns:
-            bool: True if the expression is valid
+             1 : if the expression is valid
+            -1 : if the expression contains invalid characters
+            -2 : if the expression have brackets or X without a operator before it 
         '''
         validChars = '1234567890+-/*x() '
-        if any([c not in validChars for c in expr]):
-            return False
-        else:
-            return True
+        for i,c in enumerate(expr):
+            if c not in validChars: return -1
+            if c in '(x' and i>0 and expr[i-1] not in '+-*/(': return -2
+        return 1
+
 
     def _Name(self, name):
         '''
@@ -109,3 +115,5 @@ class Expression:
         '''
         self._vars = vars
         return self._eval(self.astCode)
+
+

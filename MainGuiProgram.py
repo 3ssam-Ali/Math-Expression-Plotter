@@ -85,6 +85,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def plot(self):
         '''Plot the expression written in the textBox to the graph'''
+        sep=[] # seperator if the graph is partitioned
         if self.FunTextBox.text():
             self.graphWidget.clear()
             lBound = self.LBoundSpinBox.value()
@@ -93,18 +94,29 @@ class MainWindow(QtWidgets.QMainWindow):
             if expr := self.getExpression():
                 xAxis = range(lBound, hBound+1, step)
                 yAxis = []
-                for i in xAxis:
-                    n = expr.solve({'x': i})
+                for i,v in enumerate(xAxis): 
+                    try:n = expr.solve({'x': v})
+                    except ZeroDivisionError:
+                        n = 0
+                        sep.append(i)
                     if n > 2**50:
                         QtWidgets.QMessageBox.warning(QtWidgets.QMessageBox(),
                                                       'Error', f"The Values of f(x) became too large to draw.")
                         break
                     yAxis.append(n)
                 else:
-                    self.graphWidget.plot(xAxis, yAxis, pen=self._pen)
+                    if sep:
+                        if len(sep)==len(xAxis):
+                            QtWidgets.QMessageBox.warning(QtWidgets.QMessageBox(),
+                                                      'Error', f"Cannot divide by zero.")
+                        else:
+                            for s in sep:
+                                self.graphWidget.plot(xAxis[:s], yAxis[:s], pen=self._pen)
+                                self.graphWidget.plot(xAxis[s+1:], yAxis[s+1:], pen=self._pen)
+                    else: 
+                        self.graphWidget.plot(xAxis, yAxis, pen=self._pen)
         else:
             self.emptyWarning()
-
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
