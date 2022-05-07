@@ -4,7 +4,7 @@ import operator as op
 
 class Expression:
     """ 
-    Basic Expression Class with local Parser and variables
+    Basic Mathematical Expression Class with local Parser and variables
 
     Args:
     ----
@@ -39,7 +39,7 @@ class Expression:
         if valid == -1:
             raise ValueError(f"Not a valid algebraic expression: {expr}.")
         elif valid == -2: 
-            raise SyntaxError('There are a bracket or X without and operator before it')
+            raise SyntaxError('There are a bracket or X without an operator before it')
         else:
             try:
                 self.astCode = ast.parse(expr, mode='eval')
@@ -58,7 +58,8 @@ class Expression:
             -1 : if the expression contains invalid characters
             -2 : if the expression have brackets or X without a operator before it 
         '''
-        validChars = '1234567890+-/*x() '
+        validChars = '1234567890+-/*x(). '
+        expr=expr.replace(' ','')
         for i,c in enumerate(expr):
             if c not in validChars: return -1
             if c in '(x' and i>0 and expr[i-1] not in '+-*/(': return -2
