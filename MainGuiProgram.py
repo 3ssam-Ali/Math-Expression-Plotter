@@ -89,15 +89,19 @@ class MainWindow(QtWidgets.QMainWindow):
         '''Plot the expression written in the textBox to the graph'''
         sep=[] # seperator if the graph is partitioned
         if self.FunTextBox.text():
-            self.graphWidget.clear()
+            self.graphWidget.clear() #Clearing the previous graph
+            #getting the range values
             lBound = self.LBoundSpinBox.value()
             hBound = self.HBoundSpinBox.value()
             step = self.StepSpinBox.value()
+            # Calculating The Y points 
             if expr := self.getExpression():
                 xAxis = range(lBound, hBound+1, step)
                 yAxis = []
+                minY,maxY=None,None
                 for i,v in enumerate(xAxis): 
-                    try:n = expr.solve({'x': v})
+                    try: 
+                        n = expr.solve({'x': v})
                     except TypeError as te:
                         QtWidgets.QMessageBox.warning(QtWidgets.QMessageBox(),
                                                     'Error', f"Only simple expressions allowed.")
@@ -110,7 +114,13 @@ class MainWindow(QtWidgets.QMainWindow):
                                                       'Error', f"The Values of f(x) became too large to draw.")
                         break
                     yAxis.append(n)
+                    minY=n if minY is None else min(minY,n)
+                    maxY=n if maxY is None else max(maxY,n)
                 else:
+                    # Adjusting the range of the axis so the graph is visible
+                    self.graphWidget.setXRange(lBound-10, hBound+10)
+                    self.graphWidget.setYRange(minY-10, maxY+10)
+                    # if the the graph is seperated like in 1/x. draw each part
                     if sep:
                         if len(sep)==len(xAxis):
                             QtWidgets.QMessageBox.warning(QtWidgets.QMessageBox(),
