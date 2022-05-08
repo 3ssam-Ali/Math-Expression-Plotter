@@ -10,6 +10,7 @@ class Expression:
     ----
        _vars (mapping): mapping Variables or Objects where obj[name] -> numerical value 
        astcode : the syntax tree representation for the expression
+       TextExpression : a string representation of the original expression
 
     Functions:
     ---------
@@ -33,9 +34,10 @@ class Expression:
         ast.USub: op.neg,
         ast.UAdd: lambda a: a
     }
-
+    TextExpression= ''
     def __init__(self, expr: str):
         valid=self.checkValid(expr)
+        self.TextExpression= expr
         if valid == -1:
             raise ValueError(f"Not a valid algebraic expression: {expr}.")
         elif valid == -2: 

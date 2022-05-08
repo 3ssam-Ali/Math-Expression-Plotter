@@ -2,7 +2,9 @@ from PyQt5 import QtWidgets, uic, QtGui
 import pyqtgraph as pg
 import sys
 from MathParser import Expression
-
+import logging
+logging.basicConfig(filename='Log.log', filemode='w',
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 class MainWindow(QtWidgets.QMainWindow):
 
@@ -64,21 +66,21 @@ class MainWindow(QtWidgets.QMainWindow):
         except ValueError as se:  # the expression contains invalid characters
             QtWidgets.QMessageBox.warning(QtWidgets.QMessageBox(),
                                           'Invalid Expression', f"Not a valid algebraic expression: {self.FunTextBox.text()}.\nThe expression probably contains invalid characters.")
+            logging.exception(f'{txt}')
         except SyntaxError as se:  # the expression is written wrong
             QtWidgets.QMessageBox.warning(QtWidgets.QMessageBox(),
                                           'Syntax Error', f"Check your syntax.\nYou may have forgotten a bracket or an operator somewhere.")
+            logging.exception(f'{txt}')
         except NameError as ne:
             QtWidgets.QMessageBox.warning(QtWidgets.QMessageBox(),
                                           'Variable Error', f"Some variable/s in the expression is not recognized")
-        except TypeError as te:
-            QtWidgets.QMessageBox.warning(QtWidgets.QMessageBox(),
-                                          'Error', f"Only simple expressions allowed.")
+            logging.exception(f'{txt}')
         else:
             return expr
         return None
 
     def emptyWarning(self):
-        '''Shows a temporary toolTip warning of empty expression'''
+        '''Shows a temporary toolTip warning of empty expression text field'''
         point = self.pos()+self.FunTextBox.pos()
         QtWidgets.QToolTip.showText(
             point, "This field can't be empty", self.FunTextBox)
@@ -96,6 +98,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 yAxis = []
                 for i,v in enumerate(xAxis): 
                     try:n = expr.solve({'x': v})
+                    except TypeError as te:
+                        QtWidgets.QMessageBox.warning(QtWidgets.QMessageBox(),
+                                                    'Error', f"Only simple expressions allowed.")
+                        logging.exception(f'{expr.TextExpression}')
                     except ZeroDivisionError:
                         n = 0
                         sep.append(i)
@@ -109,6 +115,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         if len(sep)==len(xAxis):
                             QtWidgets.QMessageBox.warning(QtWidgets.QMessageBox(),
                                                       'Error', f"Cannot divide by zero.")
+                            logging.info(f'{expr.TextExpression} devision by zero')
                         else:
                             for s in sep:
                                 self.graphWidget.plot(xAxis[:s], yAxis[:s], pen=self._pen)
